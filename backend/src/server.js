@@ -38,6 +38,15 @@ app.use('/api/ai/plagiarism-detection', require('./routes/aiPlagiarismDetection'
 app.use('/api/browser-security', require('./routes/browserSecurity'));
 app.use('/api/live-monitoring', require('./routes/liveMonitoring'));
 app.use('/api/settings', require('./routes/settings'));
+app.use('/api/ai/new', require('./routes/aiNew'));
+app.use('/api/ext', require('./routes/extensions')); // Apply pass 5 backlog: LMS, eye-gaze, appeals, stress detection
+app.use('/api/agentic-proctor', require('./routes/agenticProctor'));
+app.use('/api/keystroke-biometrics', require('./routes/keystrokeBiometrics'));
+app.use('/api/voice-auth', require('./routes/voiceAuth'));
+app.use('/api/environment-scan', require('./routes/environmentScan'));
+app.use('/api/stress-monitor', require('./routes/stressMonitor'));
+app.use('/api/accessibility', require('./routes/accessibilityAccommodations'));
+app.use('/api/post-exam-forensics', require('./routes/postExamForensics'));
 
 // 404 handler
 app.use((req, res) => {
@@ -228,6 +237,25 @@ async function initializeDatabase() {
         value TEXT,
         updated_at TIMESTAMP DEFAULT NOW()
       );
+
+      CREATE TABLE IF NOT EXISTS proctor_actions (
+        id SERIAL PRIMARY KEY,
+        proctor_user_id INTEGER,
+        session_id INTEGER,
+        action VARCHAR(100),
+        reason TEXT,
+        created_at TIMESTAMP DEFAULT NOW()
+      );
+
+      CREATE TABLE IF NOT EXISTS ai_analyses (
+        id SERIAL PRIMARY KEY,
+        user_id INTEGER,
+        analysis_type VARCHAR(100),
+        event_id INTEGER,
+        content TEXT,
+        model VARCHAR(100),
+        created_at TIMESTAMP DEFAULT NOW()
+      );
     `);
 
     console.log('Database tables created/verified.');
@@ -271,7 +299,15 @@ async function initializeDatabase() {
 }
 
 initializeDatabase().then(() => {
-  app.listen(PORT, () => {
+  
+// === Batch 03 Gaps & Frontend Mounts ===
+try {
+  const _batch03 = require('../routes/batch03Gaps');
+  if (typeof authenticateToken === 'function') app.use('/api', authenticateToken, _batch03);
+  else app.use('/api', _batch03);
+} catch (_e) { /* batch03 gap routes optional */ }
+
+app.listen(PORT, () => {
     console.log(`Backend server running on http://localhost:${PORT}`);
   });
 });

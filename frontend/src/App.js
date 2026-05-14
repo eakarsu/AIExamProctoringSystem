@@ -14,9 +14,12 @@ import FaceVerificationPage from './pages/FaceVerificationPage';
 import BehaviorAnalysisPage from './pages/BehaviorAnalysisPage';
 import AudioMonitoringPage from './pages/AudioMonitoringPage';
 import PlagiarismDetectionPage from './pages/PlagiarismDetectionPage';
+import AIInsightsPage from './pages/AIInsightsPage';
 import BrowserSecurityPage from './pages/BrowserSecurityPage';
 import LiveMonitoringPage from './pages/LiveMonitoringPage';
 import SettingsPage from './pages/SettingsPage';
+
+import Batch03Features from './pages/Batch03Features';
 
 function ProtectedRoute({ children }) {
   const { token, loading } = useAuth();
@@ -41,6 +44,7 @@ const navItems = [
   { path: '/ai/behavior-analysis', label: 'Behavior Analysis', icon: '🧠' },
   { path: '/ai/audio-monitoring', label: 'Audio Monitoring', icon: '🎙️' },
   { path: '/ai/plagiarism-detection', label: 'Plagiarism Detection', icon: '📋' },
+  { path: '/ai/insights', label: 'AI Insights', icon: '✨' },
   { section: 'Security' },
   { path: '/browser-security', label: 'Browser Security', icon: '🔒' },
   { path: '/live-monitoring', label: 'Live Monitoring', icon: '📡' },
@@ -100,6 +104,7 @@ function AppLayout() {
       <Sidebar />
       <div className="main-content">
         <Routes>
+          <Route path="/batch03" element={<Batch03Features />} />
           <Route path="/" element={<Dashboard />} />
           <Route path="/exams" element={<ExamsPage />} />
           <Route path="/students" element={<StudentsPage />} />
@@ -112,6 +117,7 @@ function AppLayout() {
           <Route path="/ai/behavior-analysis" element={<BehaviorAnalysisPage />} />
           <Route path="/ai/audio-monitoring" element={<AudioMonitoringPage />} />
           <Route path="/ai/plagiarism-detection" element={<PlagiarismDetectionPage />} />
+          <Route path="/ai/insights" element={<AIInsightsPage />} />
           <Route path="/browser-security" element={<BrowserSecurityPage />} />
           <Route path="/live-monitoring" element={<LiveMonitoringPage />} />
           <Route path="/settings" element={<SettingsPage />} />

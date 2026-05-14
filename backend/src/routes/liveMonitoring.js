@@ -78,6 +78,23 @@ router.post('/session/:id/flag', authenticate, async (req, res) => {
       [sessionId, reason || 'Session flagged by proctor']
     );
 
+    // Proctor audit log
+    await pool.query(`
+      CREATE TABLE IF NOT EXISTS proctor_actions (
+        id SERIAL PRIMARY KEY,
+        proctor_user_id INTEGER,
+        session_id INTEGER,
+        action VARCHAR(100),
+        reason TEXT,
+        created_at TIMESTAMP DEFAULT NOW()
+      )
+    `);
+    await pool.query(
+      `INSERT INTO proctor_actions (proctor_user_id, session_id, action, reason)
+       VALUES ($1, $2, 'flag-session', $3)`,
+      [req.user?.id || null, sessionId, reason || 'No reason provided']
+    );
+
     res.json({ success: true, data: { message: 'Session flagged successfully.', session_id: parseInt(sessionId, 10) } });
   } catch (err) {
     console.error('Flag session error:', err);
