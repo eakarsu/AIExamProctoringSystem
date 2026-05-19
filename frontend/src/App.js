@@ -20,6 +20,7 @@ import LiveMonitoringPage from './pages/LiveMonitoringPage';
 import SettingsPage from './pages/SettingsPage';
 
 import Batch03Features from './pages/Batch03Features';
+import CustomViewsPage from './pages/CustomViewsPage';
 
 function ProtectedRoute({ children }) {
   const { token, loading } = useAuth();
@@ -48,6 +49,8 @@ const navItems = [
   { section: 'Security' },
   { path: '/browser-security', label: 'Browser Security', icon: '🔒' },
   { path: '/live-monitoring', label: 'Live Monitoring', icon: '📡' },
+  { section: 'Custom' },
+  { path: '/custom-views', label: 'Proctor Views', icon: '🧩' },
   { section: 'System' },
   { path: '/settings', label: 'Settings', icon: '⚙️' },
 ];
@@ -121,6 +124,7 @@ function AppLayout() {
           <Route path="/browser-security" element={<BrowserSecurityPage />} />
           <Route path="/live-monitoring" element={<LiveMonitoringPage />} />
           <Route path="/settings" element={<SettingsPage />} />
+          <Route path="/custom-views" element={<CustomViewsPage />} />
         </Routes>
       </div>
     </div>

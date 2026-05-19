@@ -47,6 +47,7 @@ app.use('/api/environment-scan', require('./routes/environmentScan'));
 app.use('/api/stress-monitor', require('./routes/stressMonitor'));
 app.use('/api/accessibility', require('./routes/accessibilityAccommodations'));
 app.use('/api/post-exam-forensics', require('./routes/postExamForensics'));
+app.use('/api/custom-views', require('./routes/customViews'));
 
 // 404 handler
 app.use((req, res) => {
