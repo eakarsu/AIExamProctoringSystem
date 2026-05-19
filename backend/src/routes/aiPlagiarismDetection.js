@@ -2,12 +2,13 @@ const express = require('express');
 const router = express.Router();
 const pool = require('../config/database');
 const authenticate = require('../middleware/auth');
+const { aiRateLimiter } = require('../middleware/rateLimiter');
 const { analyzeWithAI } = require('../services/aiService');
 
 const SYSTEM_PROMPT = 'You are an AI plagiarism detection system. Compare the student\'s answer with provided reference materials and identify potential plagiarism. Provide a detailed analysis with sections: Plagiarism Assessment, Similarity Analysis, Flagged Passages, and Recommendations. Use clear headings with ** markers and bullet points with - for lists. Be thorough but concise.';
 
 // POST /api/ai/plagiarism-detection/analyze
-router.post('/analyze', authenticate, async (req, res) => {
+router.post('/analyze', authenticate, aiRateLimiter, async (req, res) => {
   try {
     const { student_answer, original_text } = req.body;
 

@@ -37,6 +37,25 @@ router.post('/', authenticate, async (req, res) => {
        VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING *`,
       [session_id, event_type, details, ip_address, user_agent, blocked ?? false, timestamp || new Date()]
     );
+
+    // Auto-incident creation: if tab-switch, check count in last 5 minutes
+    if (event_type === 'tab-switch' && session_id) {
+      const fiveMinutesAgo = new Date(Date.now() - 5 * 60 * 1000);
+      const countResult = await pool.query(
+        `SELECT COUNT(*) FROM browser_security_events
+         WHERE session_id = $1 AND event_type = 'tab-switch' AND timestamp >= $2`,
+        [session_id, fiveMinutesAgo]
+      );
+      const switchCount = parseInt(countResult.rows[0].count);
+      if (switchCount >= 3) {
+        await pool.query(
+          `INSERT INTO incidents (session_id, type, severity, ai_confidence, description, timestamp, status)
+           VALUES ($1, 'suspicious_behavior', 'medium', 0.75, 'Multiple tab switches detected', NOW(), 'open')`,
+          [session_id]
+        );
+      }
+    }
+
     res.status(201).json({ success: true, data: result.rows[0] });
   } catch (err) {
     console.error('Create browser security event error:', err);

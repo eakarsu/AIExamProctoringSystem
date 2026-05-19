@@ -5,7 +5,7 @@ async function analyzeWithAI(prompt, systemMessage) {
     const response = await axios.post(
       `${process.env.OPENROUTER_BASE_URL}/chat/completions`,
       {
-        model: process.env.OPENROUTER_MODEL || 'anthropic/claude-haiku-4.5',
+        model: 'anthropic/claude-3-5-sonnet-20241022',
         messages: [
           { role: 'system', content: systemMessage },
           { role: 'user', content: prompt },

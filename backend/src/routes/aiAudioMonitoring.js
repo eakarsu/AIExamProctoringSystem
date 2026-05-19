@@ -2,20 +2,21 @@ const express = require('express');
 const router = express.Router();
 const pool = require('../config/database');
 const authenticate = require('../middleware/auth');
+const { aiRateLimiter } = require('../middleware/rateLimiter');
 const { analyzeWithAI } = require('../services/aiService');
 
 const SYSTEM_PROMPT = 'You are an AI audio monitoring system for exam proctoring. Analyze the audio environment during an exam session. Detect voices, background conversations, suspicious sounds, or any audio that might indicate cheating. Provide a detailed analysis with sections: Audio Environment Assessment, Detected Sounds, Risk Analysis, and Recommendations. Use clear headings with ** markers and bullet points with - for lists. Be thorough but concise.';
 
 // POST /api/ai/audio-monitoring/analyze
-router.post('/analyze', authenticate, async (req, res) => {
+router.post('/analyze', authenticate, aiRateLimiter, async (req, res) => {
   try {
-    const { session_id, audio_data } = req.body;
+    const { session_id, audio_description } = req.body;
 
-    if (!session_id || !audio_data) {
-      return res.status(400).json({ success: false, error: 'session_id and audio_data are required.' });
+    if (!session_id || !audio_description) {
+      return res.status(400).json({ success: false, error: 'session_id and audio_description are required.' });
     }
 
-    const prompt = `Session ID: ${session_id}\nAudio Data: ${audio_data}`;
+    const prompt = `Session ID: ${session_id}\nAudio Data: ${audio_description}`;
     const analysis = await analyzeWithAI(prompt, SYSTEM_PROMPT);
 
     let confidence = 0.85;
