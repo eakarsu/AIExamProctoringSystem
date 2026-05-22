@@ -21,6 +21,12 @@ import SettingsPage from './pages/SettingsPage';
 
 import Batch03Features from './pages/Batch03Features';
 import CustomViewsPage from './pages/CustomViewsPage';
+import AccommodationIntegrityAudit from './pages/AccommodationIntegrityAudit';
+
+import CodexCustomVizFeature from './pages/CodexCustomVizFeature';
+import CodexOperationsFeature from './pages/CodexOperationsFeature';
+
+import TimelineView from './pages/TimelineView';
 
 function ProtectedRoute({ children }) {
   const { token, loading } = useAuth();
@@ -51,6 +57,7 @@ const navItems = [
   { path: '/live-monitoring', label: 'Live Monitoring', icon: '📡' },
   { section: 'Custom' },
   { path: '/custom-views', label: 'Proctor Views', icon: '🧩' },
+  { path: '/accommodation-integrity-audit', label: 'Accommodation Audit', icon: '♿' },
   { section: 'System' },
   { path: '/settings', label: 'Settings', icon: '⚙️' },
 ];
@@ -107,6 +114,10 @@ function AppLayout() {
       <Sidebar />
       <div className="main-content">
         <Routes>
+        <Route path="/insights/timeline" element={<ProtectedRoute><TimelineView /></ProtectedRoute>} />
+        <Route path="/codex/custom-viz" element={<ProtectedRoute><CodexCustomVizFeature /></ProtectedRoute>} />
+        <Route path="/codex/operations" element={<ProtectedRoute><CodexOperationsFeature /></ProtectedRoute>} />
+
           <Route path="/batch03" element={<Batch03Features />} />
           <Route path="/" element={<Dashboard />} />
           <Route path="/exams" element={<ExamsPage />} />
@@ -125,6 +136,7 @@ function AppLayout() {
           <Route path="/live-monitoring" element={<LiveMonitoringPage />} />
           <Route path="/settings" element={<SettingsPage />} />
           <Route path="/custom-views" element={<CustomViewsPage />} />
+          <Route path="/accommodation-integrity-audit" element={<AccommodationIntegrityAudit />} />
         </Routes>
       </div>
     </div>
