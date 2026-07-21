@@ -1,6 +1,9 @@
 const jwt = require('jsonwebtoken');
 
 const authenticate = (req, res, next) => {
+  if (!process.env.JWT_SECRET || process.env.JWT_SECRET.length < 32) {
+    return res.status(500).json({ success: false, error: 'Authentication is not configured.' });
+  }
   const authHeader = req.headers.authorization;
 
   if (!authHeader || !authHeader.startsWith('Bearer ')) {
