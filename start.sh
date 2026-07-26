@@ -64,6 +64,7 @@ set -a
 # shellcheck disable=SC1091
 source "$project_root/.env"
 set +a
+if [ "${NODE_ENV:-development}" != production ] && [ "${ENABLE_DEMO_CREDENTIAL_AUTOFILL:-true}" = true ]; then psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -f "$project_root/backend/schema.sql" >/dev/null; node "$project_root/backend/src/provision-demo-credentials.js"; fi
 
 if [[ ! -d "$project_root/backend/node_modules" ]]; then
   echo "Backend dependencies are absent. Run ./scripts/bootstrap.sh explicitly." >&2
