@@ -37,7 +37,7 @@ export default function Login() {
         <p className="subtitle">Secure AI-Powered Exam Proctoring System</p>
 
         <button onClick={fillCredentials} className="btn-fill-credentials">
-          ⚡ Auto-Fill Demo Credentials
+          Auto Fill Demo Credentials
         </button>
 
         {error && <div className="login-error">{error}</div>}
