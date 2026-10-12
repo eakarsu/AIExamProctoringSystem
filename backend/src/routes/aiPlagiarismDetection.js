@@ -26,10 +26,10 @@ router.post('/analyze', authenticate, aiRateLimiter, async (req, res) => {
 
     try {
       const parsed = JSON.parse(analysis);
-      confidence = parsed.confidence || 0.85;
-      risk_level = parsed.risk_level || 'low';
-      similarity_score = parsed.similarity_score || 0;
-      recommendations = JSON.stringify(parsed.recommendations || []);
+      confidence = parsed.confidence ?? 0.85;
+      risk_level = parsed.risk_level ?? 'low';
+      similarity_score = parsed.similarity_score ?? 0;
+      recommendations = JSON.stringify(parsed.recommendations ?? []);
     } catch {
       const confMatch = analysis.match(/confidence[:\s]*([\d.]+)/i);
       if (confMatch) confidence = parseFloat(confMatch[1]);

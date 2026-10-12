@@ -11,8 +11,12 @@ export default function Login() {
   const navigate = useNavigate();
 
   const fillCredentials = () => {
-    setEmail(process.env.REACT_APP_DEMO_EMAIL || '');
-    setPassword(process.env.REACT_APP_DEMO_PASSWORD || '');
+    const demoEmail = process.env.REACT_APP_DEMO_EMAIL;
+    const demoPassword = process.env.REACT_APP_DEMO_PASSWORD;
+    if (!demoEmail || !demoPassword) { setError('Demo credentials are not configured for this local build.'); return; }
+    setError('');
+    setEmail(demoEmail);
+    setPassword(demoPassword);
   };
 
   const handleSubmit = async (e) => {
@@ -36,8 +40,8 @@ export default function Login() {
         <h1>AI Exam Proctor</h1>
         <p className="subtitle">Secure AI-Powered Exam Proctoring System</p>
 
-        <button onClick={fillCredentials} className="btn-fill-credentials">
-          Auto Fill Demo Credentials
+        <button type="button" onClick={fillCredentials} className="btn-fill-credentials">
+          Fill Demo Credentials
         </button>
 
         {error && <div className="login-error">{error}</div>}

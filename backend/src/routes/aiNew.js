@@ -29,6 +29,21 @@ async function persistAnalysis(userId, analysisType, refId, content) {
   return result.rows[0].id;
 }
 
+// GET /api/ai/new/history — read only; never creates records or tables.
+router.get('/history', authenticate, async (req, res) => {
+  try {
+    const result = await pool.query(
+      `SELECT id, analysis_type, event_id, content, model, created_at
+       FROM ai_analyses WHERE user_id = $1 ORDER BY created_at DESC LIMIT 100`,
+      [req.user.id]
+    );
+    res.json({ success: true, data: result.rows });
+  } catch (err) {
+    console.error('AI history error:', err);
+    res.status(500).json({ success: false, error: 'Failed to load AI history.' });
+  }
+});
+
 // POST /api/ai/new/session-risk-summary
 router.post('/session-risk-summary', authenticate, aiRateLimiter, async (req, res) => {
   try {

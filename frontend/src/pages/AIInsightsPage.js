@@ -1,41 +1,7 @@
-import React, { useState } from 'react';
+import AIResultView from '../components/AIResultView';
+import AIRecordPresets from '../components/AIRecordPresets';
+import React, { useState, useEffect } from 'react';
 import api from '../services/api';
-
-const AnalysisBlock = ({ title, content }) => {
-  if (!content) return null;
-  const paragraphs = String(content).split('\n').filter((p) => p.trim());
-  return (
-    <div className="ai-output" style={{ marginTop: 16 }}>
-      <div className="ai-output-header">
-        <span className="ai-badge">{title}</span>
-        <span className="ai-model">Powered by Claude via OpenRouter</span>
-      </div>
-      <div className="ai-output-body">
-        {paragraphs.map((p, i) => {
-          const trimmed = p.trim();
-          if (trimmed.startsWith('##') || trimmed.startsWith('**')) {
-            return <h4 key={i}>{trimmed.replace(/^[#*]+\s*/, '').replace(/\*\*$/, '')}</h4>;
-          }
-          if (trimmed.startsWith('- ') || trimmed.startsWith('• ')) {
-            return (
-              <li key={i} style={{ marginLeft: 20, color: '#94a3b8', fontSize: 13, marginBottom: 4 }}>
-                {trimmed.slice(2)}
-              </li>
-            );
-          }
-          if (trimmed.match(/^\d+\./)) {
-            return (
-              <li key={i} style={{ marginLeft: 20, color: '#94a3b8', fontSize: 13, marginBottom: 4 }}>
-                {trimmed}
-              </li>
-            );
-          }
-          return <p key={i}>{trimmed}</p>;
-        })}
-      </div>
-    </div>
-  );
-};
 
 function ErrorBox({ error }) {
   if (!error) return null;
@@ -71,6 +37,9 @@ export default function AIInsightsPage() {
   const [forensicsResult, setForensicsResult] = useState(null);
   const [loadingKey, setLoadingKey] = useState('');
   const [error, setError] = useState('');
+  const [history, setHistory] = useState([]);
+  const [selectedHistory, setSelectedHistory] = useState(null);
+  useEffect(() => { api.get('/ai/new/history').then((res) => setHistory(res.data?.data || [])).catch(() => {}); }, []);
 
   const callEndpoint = async (key, path, payload, setter) => {
     setError('');
@@ -79,6 +48,7 @@ export default function AIInsightsPage() {
     try {
       const res = await api.post(path, payload);
       setter(res.data?.data || res.data);
+      api.get('/ai/new/history').then((historyRes) => setHistory(historyRes.data?.data || [])).catch(() => {});
     } catch (err) {
       const status = err.response?.status;
       const msg = err.response?.data?.error || err.message || 'Request failed';
@@ -141,6 +111,7 @@ export default function AIInsightsPage() {
           <div className="table-header">
             <h3>Session Risk Summary</h3>
           </div>
+          <AIRecordPresets kind="sessions" selectedId={sessionId} onFill={(id) => setSessionId(String(id))} scenarios={[{ label: 'Most recent record', value: null }, { label: 'Second recent record', value: null }, { label: 'Third recent record', value: null }]} disabled={loadingKey !== ''} />
           <form className="ai-form" onSubmit={handleRisk}>
             <div className="form-group">
               <label>Session ID</label>
@@ -157,13 +128,14 @@ export default function AIInsightsPage() {
               {loadingKey === 'risk' ? 'Analyzing...' : 'Generate Risk Summary'}
             </button>
           </form>
-          {riskResult && <AnalysisBlock title="Session Risk" content={riskResult.analysis} />}
+          {riskResult && <AIResultView title="Session Risk" response={riskResult} />}
         </div>
 
         <div className="data-table-container" style={{ marginTop: 24 }}>
           <div className="table-header">
             <h3>Exam Integrity Report</h3>
           </div>
+          <AIRecordPresets kind="exams" selectedId={examId} onFill={(id) => setExamId(String(id))} scenarios={[{ label: 'Most recent record', value: null }, { label: 'Second recent record', value: null }, { label: 'Third recent record', value: null }]} disabled={loadingKey !== ''} />
           <form className="ai-form" onSubmit={handleIntegrity}>
             <div className="form-group">
               <label>Exam ID</label>
@@ -180,15 +152,14 @@ export default function AIInsightsPage() {
               {loadingKey === 'integrity' ? 'Analyzing...' : 'Generate Integrity Report'}
             </button>
           </form>
-          {integrityResult && (
-            <AnalysisBlock title="Exam Integrity" content={integrityResult.analysis} />
-          )}
+          {integrityResult && <AIResultView title="Exam Integrity" response={integrityResult} />}
         </div>
 
         <div className="data-table-container" style={{ marginTop: 24 }}>
           <div className="table-header">
             <h3>Proctor Recommendations</h3>
           </div>
+          <AIRecordPresets kind="sessions" selectedId={proctorSessionId} onFill={(id) => setProctorSessionId(String(id))} scenarios={[{ label: 'Most recent record', value: null }, { label: 'Second recent record', value: null }, { label: 'Third recent record', value: null }]} disabled={loadingKey !== ''} />
           <form className="ai-form" onSubmit={handleRecs}>
             <div className="form-group">
               <label>Session ID</label>
@@ -205,15 +176,14 @@ export default function AIInsightsPage() {
               {loadingKey === 'recs' ? 'Analyzing...' : 'Generate Recommendations'}
             </button>
           </form>
-          {recsResult && (
-            <AnalysisBlock title="Proctor Recommendations" content={recsResult.analysis} />
-          )}
+          {recsResult && <AIResultView title="Proctor Recommendations" response={recsResult} />}
         </div>
 
         <div className="data-table-container" style={{ marginTop: 24 }}>
           <div className="table-header">
             <h3>Post-Exam Forensics</h3>
           </div>
+          <AIRecordPresets kind="sessions" selectedId={forensicsSessionId} onFill={(id) => setForensicsSessionId(String(id))} scenarios={[{ label: 'Most recent record', value: null }, { label: 'Second recent record', value: null }, { label: 'Third recent record', value: null }]} disabled={loadingKey !== ''} />
           <form className="ai-form" onSubmit={handleForensics}>
             <div className="form-group">
               <label>Session ID</label>
@@ -230,10 +200,13 @@ export default function AIInsightsPage() {
               {loadingKey === 'forensics' ? 'Analyzing...' : 'Generate Forensic Timeline'}
             </button>
           </form>
-          {forensicsResult && (
-            <AnalysisBlock title="Post-Exam Forensics" content={forensicsResult.analysis} />
-          )}
+          {forensicsResult && <AIResultView title="Post-Exam Forensics" response={forensicsResult} />}
         </div>
+        <section className="data-table-container" style={{ marginTop: 24 }}>
+          <div className="table-header"><h3>Saved AI reports</h3></div>
+          {history.length === 0 ? <p>No saved reports available.</p> : <ul>{history.map((item) => <li key={item.id}><button type="button" className="btn btn-secondary btn-sm" onClick={() => setSelectedHistory(item)}>{item.analysis_type.replace(/-/g, ' ')} · {new Date(item.created_at).toLocaleString()}</button></li>)}</ul>}
+          {selectedHistory && <AIResultView title={selectedHistory.analysis_type.replace(/-/g, ' ')} response={{ analysis: selectedHistory.content }} label="Saved report" />}
+        </section>
       </div>
     </div>
   );
